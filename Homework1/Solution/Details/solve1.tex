@@ -1,0 +1,34 @@
+\begin{solution}
+    \begin{enumerate}
+        \item[(i)] 
+        $\frac{\partial y_i}{\partial\gamma} = \hat{x}_i$, 
+        $\frac{\partial y_i}{\partial\beta} = 1$
+        \item[(ii)]设dropout层的输入为$\mathcal{DI}$（$n_{1a}$维），其中第i个值为$\mathcal{DI}_i$，
+        设dropout层的输出为$\mathcal{DO}$（$n_{1a}$维），其中第j个值为$\mathcal{DO}_j$，则：
+        \begin{align*}
+            \frac{\partial \mathcal{DO}_j}{\partial \mathcal{DI}_i} = 
+            \begin{cases}
+                0 & i\neq j\\
+                0 & i=j \wedge r_i<p\\
+                1/(1-p) & i=j \wedge r_i\ge p
+            \end{cases}
+        \end{align*}
+        \item[(iii)]设Softmax函数的输入为$\mathcal{SI}$（$n_{yb}$维），其中第i个值为$\mathcal{SI}_i$，
+        设Softmax函数的输出为$\mathcal{SO}$（$n_{yb}$维），其中第j个值为$\mathcal{SO}_j$，则：
+        \begin{itemize}
+            \item 若$i=j$：
+            \begin{align*}
+                \frac{\partial \mathcal{SO}_j}{\partial \mathcal{SI}_i} &= \frac{\partial \frac{e^{\mathcal{SI}_i}}{\sum_k e^{\mathcal{SI}_k}}}{\partial \mathcal{SI}_i}
+                =\frac{e^{\mathcal{SI}_i}\cdot (\sum_k e^{\mathcal{SI}_k})-e^{\mathcal{SI}_i}\cdot e^{\mathcal{SI}_i}}{(\sum_k e^{\mathcal{SI}_k})^2}\\
+                &=\mathcal{SO}_j\cdot(1-\mathcal{SO}_j)
+            \end{align*}
+            \item 若$i\neq j$：
+            \begin{align*}
+                \frac{\partial \mathcal{SO}_j}{\partial \mathcal{SI}_i} &= \frac{\partial \frac{e^{\mathcal{SI}_j}}{\sum_k e^{\mathcal{SI}_k}}}{\partial \mathcal{SI}_i}
+                =\frac{-e^{\mathcal{SI}_j}\cdot e^{\mathcal{SI}_i}}{(\sum_k e^{\mathcal{SI}_k})^2}
+                =-\mathcal{SO}_i\cdot\mathcal{SO}_j
+            \end{align*}
+        \end{itemize}
+        
+    \end{enumerate}
+\end{solution}
