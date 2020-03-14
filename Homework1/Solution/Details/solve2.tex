@@ -1,3 +1,25 @@
 \begin{solution}
+    \begin{enumerate}
+        \item[(i)] 由于是全连接层，$FC_{1A}$层的输入：$$Z^{FC_{1A}}=\theta_{1a}\bm{x}+b_{1a}$$
 
+        对应$FC_{1A}$层的激活：$$a^{FC_{1A}}=\textbf{ReLU}(Z^{FC_{1A}})$$
+
+        % 由于是直连，$DP_{1A}$层输入即$FC_{1A}$层激活：$Z^{DP_{1A}}=a^{FC_{1A}}$；
+
+        由于是全连接层，但受到$DP_{1A}$层dropout的影响，且$FC_{2A}$层没有激活函数，$FC_{2A}$层的输入
+        即预测的$\hat{y}_a$：
+        $$\hat{y}_a=Z^{FC_{2A}}=\theta_{2a}a^{FC_{1A}}*\textbf{M}+b_{2a}$$
+        其中$\textbf{M}$是random mask向量，运算$*$是向量的逐元素乘法；
+
+        类似$FC_{1A}$层，$FC_{1B}$层的输入：$$Z^{FC_{1B}}=\theta_{1b}\bm{x}+b_{1b}$$
+
+        对应$FC_{1B}$层的激活：$$a^{FC_{1B}}=\textbf{ReLU}(Z^{FC_{1B}})$$
+
+        经过$\textbf{BN}$层以及随后的逐元素加运算$\bigoplus$，$FC_{2B}$层的输入：
+        $$Z^{FC_{2B}}=\theta_{2b}(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})\bigoplus\hat{y}_a)+b_{2b}$$
+        其中$\gamma,\beta$是Bitch Normalize的参数；
+
+        对应$FC_{2B}$层的激活即预测的$\hat{y}_b$：$$\hat{y}_b=a^{FC_{2B}}=\textbf{Softmax}(Z^{FC_{2B}})$$
+        \item[(ii)] 
+    \end{enumerate}
 \end{solution}
