@@ -1,6 +1,7 @@
 \begin{solution}
     \begin{enumerate}
-        \item[(i)] 由于是全连接层，$FC_{1A}$层的输入：$$Z^{FC_{1A}}=\theta_{1a}\bm{x}+b_{1a}$$
+        \item[(i)] 
+        由于是全连接层，$FC_{1A}$层的输入：$$Z^{FC_{1A}}=\theta_{1a}\bm{x}+b_{1a}$$
 
         对应$FC_{1A}$层的激活：$$a^{FC_{1A}}=\textbf{ReLU}(Z^{FC_{1A}})$$
 
@@ -8,18 +9,151 @@
 
         由于是全连接层，但受到$DP_{1A}$层dropout的影响，且$FC_{2A}$层没有激活函数，$FC_{2A}$层的输入
         即预测的$\hat{y}_a$：
-        $$\hat{y}_a=Z^{FC_{2A}}=\theta_{2a}a^{FC_{1A}}*\textbf{M}+b_{2a}$$
-        其中$\textbf{M}$是random mask向量，运算$*$是向量的逐元素乘法；
+        $$\hat{y}_a=Z^{FC_{2A}}=\theta_{2a}\left(a^{FC_{1A}}\odot\textbf{M}\right)+b_{2a}$$
+        其中$\textbf{M}$是random mask向量，运算$\odot$是向量的逐元素乘法；
 
         类似$FC_{1A}$层，$FC_{1B}$层的输入：$$Z^{FC_{1B}}=\theta_{1b}\bm{x}+b_{1b}$$
 
         对应$FC_{1B}$层的激活：$$a^{FC_{1B}}=\textbf{ReLU}(Z^{FC_{1B}})$$
 
-        经过$\textbf{BN}$层以及随后的逐元素加运算$\bigoplus$，$FC_{2B}$层的输入：
-        $$Z^{FC_{2B}}=\theta_{2b}(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})\bigoplus\hat{y}_a)+b_{2b}$$
-        其中$\gamma,\beta$是Bitch Normalize的参数；
+        经过$\textbf{BN}$层以及随后的逐元素加运算$\oplus$，$FC_{2B}$层的输入：
+        $$Z^{FC_{2B}}=\theta_{2b}\left(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}}\right)\oplus\hat{y}_a)+b_{2b}$$
+        其中$\gamma,\beta$是Batch Normalize的参数；
 
         对应$FC_{2B}$层的激活即预测的$\hat{y}_b$：$$\hat{y}_b=a^{FC_{2B}}=\textbf{Softmax}(Z^{FC_{2B}})$$
-        \item[(ii)] 
+        
+        % $FC_{1A}$层的输入：$z^{FC_{1A}}=\theta_{1a}\bm{x}+b_{1a}$；
+
+        % $FC_{1A}$层的激活：$a^{FC_{1A}}=\textbf{ReLU}(Z^{FC_{1A}})$；
+
+        % $DP_{1A}$层的输出：$a^{FC_{1A}}=\textbf{ReLU}(Z^{FC_{1A}})$；
+
+        % 由于是全连接层，但受到$DP_{1A}$层dropout的影响，且$FC_{2A}$层没有激活函数，$FC_{2A}$层的输入
+        % 即预测的$\hat{y}_a$：
+        % $$\hat{y}_a=Z^{FC_{2A}}=\theta_{2a}a^{FC_{1A}}\odot\textbf{M}+b_{2a}$$
+        % 其中$\textbf{M}$是random mask向量，运算$\odot$是向量的逐元素乘法；
+
+        % 类似$FC_{1A}$层，$FC_{1B}$层的输入：$$Z^{FC_{1B}}=\theta_{1b}\bm{x}+b_{1b}$$
+
+        % 对应$FC_{1B}$层的激活：$$a^{FC_{1B}}=\textbf{ReLU}(Z^{FC_{1B}})$$
+
+        % 经过$\textbf{BN}$层以及随后的逐元素加运算$\oplus$，$FC_{2B}$层的输入：
+        % $$Z^{FC_{2B}}=\theta_{2b}\left(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}}\right)\oplus\hat{y}_a)+b_{2b}$$
+        % 其中$\gamma,\beta$是Batch Normalize的参数；
+
+        % 对应$FC_{2B}$层的激活即预测的$\hat{y}_b$：$$\hat{y}_b=a^{FC_{2B}}=\textbf{Softmax}(Z^{FC_{2B}})$$
+        
+        \item[(ii)] 损失函数$L$：
+        $$L\left(\boldsymbol{x}, y_{a}, y_{b} ; \theta\right)=\frac{1}{m} \sum_{i=1}^{m}\left[\frac{1}{2}\left\|\left(\widehat{y}_{a i}-y_{a i}\right)\right\|_{2}^{2}-\sum_{j=1}^{n_{y b}} y_{b i}^{j} \log \left(\widehat{y}_{b i}^{j}\right)\right]$$
+
+        $FC_{2B}$的残余$\delta_{FC_{2B}}$：
+        \begin{align*}
+            \delta_{FC_{2B}} = \frac{\partial L}{\partial z^{FC_{2B}}} = \frac{\partial L}{\partial a^{FC_{2B}}}\cdot\frac{\partial a^{FC_{2B}}}{\partial z^{FC_{2B}}}
+        \end{align*}
+        前者
+        \begin{align*}
+            \frac{\partial L}{\partial a^{FC_{2B}}}=\frac{\partial L}{\partial \hat{y}_b} = -\frac{1}{m}\sum_{i=1}^{m} \frac{y_{bi}}{\hat{y}_{bi}}
+            % \begin{cases}
+            %     0& \hat{y}_b=y_b
+            % \end{cases}
+        \end{align*}
+        后者由1.1(iii)求得，代入：
+        \begin{align*}
+            \delta_{FC_{2B}} &= -\sum_{i=1}^{m} \sum_{j=1}^{n_{yb}}\frac{y_{bi}^j}{\hat{y}_{bi}^j}\cdot\frac{\partial a^{FC_{2B}}}{\partial z^{FC_{2B}}}\\
+            &= \frac{1}{m}\sum_{i=1}^{m}\left((-\frac{y_{bi}^k}{\hat{y}_{bi}^k})\hat{y}_{bi}^k(1-\hat{y}_{bi}^k)+\sum_{j\neq k}\frac{y_{bi}^j}{\hat{y}_{bi}^j}\left(\hat{y}_{bi}^j\right)^2\right)\\
+            &= \frac{1}{m}\sum_{i=1}^{m}\left(\hat{y}_{bi}-y_{bi}\right)
+        \end{align*}
+        对于$\theta_{2b}$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial \theta_{2b}} &= \delta_{FC_{2B}} \cdot \left(\frac{\partial z^{FC_{2B}}}{\partial \theta_{2b}}\right)^T \\
+            &=\frac{1}{m}\sum_{i=1}^{m}\left(\hat{y}_{bi}-y_{bi}\right)\left(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})\oplus\hat{y}_a\right)^T
+        \end{align*}
+
+        对于Batch Normalize中$\gamma$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial\gamma} &= \left(\frac{\partial \textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})}{\partial \gamma}\right)^T \cdot \left(\frac{\partial z^{FC_{2B}}}{\partial\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})}\right)^T \cdot\frac{\partial L}{\partial z^{FC_{2B}}}\\
+            &= \left(\hat{a}^{FC_{1B}}\right)^T\left(\theta_{2b}\right)^T\frac{1}{m}\sum_{i=1}^{m}\left(\hat{y}_{bi}-y_{bi}\right)
+        \end{align*}
+        其中，$\hat{a}^{FC_{1B}}$是对$a^{FC_{1B}}$的正则化。
+
+        对于Batch Normalize中$\beta$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial\beta} &= \left(\frac{\partial \textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})}{\partial \beta}\right)^T \cdot \left(\frac{\partial z^{FC_{2B}}}{\partial\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})}\right)^T \cdot\frac{\partial L}{\partial z^{FC_{2B}}}\\
+            &= \sum\left(\theta_{2b}\right)^T\frac{1}{m}\sum_{i=1}^{m}\left(\hat{y}_{bi}-y_{bi}\right)
+        \end{align*}
+        % 对于$\theta_{2b}$的梯度：
+        % \begin{align*}
+        %     \frac{\partial L}{\partial \theta_{2b}} &= \frac{\partial L}{\partial \hat{y}_b} \cdot \frac{\partial \hat{y}_b}{\partial \theta_{2b}} = \frac{\partial L}{\partial \hat{y}_b} \cdot \frac{\partial Z^{FC_{2B}}}{\partial \theta_{2b}}\cdot \textbf{Softmax}'(Z^{FC_{2B}})\\
+        %     &= \frac{\partial L}{\partial \hat{y}_b} \cdot \left(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})\oplus\hat{y}_a\right) \cdot \textbf{Softmax}'(Z^{FC_{2B}})
+        % \end{align*}
+        % 其中$\textbf{Softmax}'$可由1.1(iii)求得。
+
+        $FC_{1B}$的残余$\delta_{FC_{1B}}$：
+        \begin{align*}
+            \delta_{FC_{1B}} &= \frac{\partial L}{\partial z^{FC_{1B}}} 
+            =\left(\frac{\partial z^{FC_{2B}}}{\partial a^{FC_{1B}}}\right)^T \cdot \delta_{FC_{2B}} \cdot \frac{\partial a^{FC_{1B}}}{\partial z^{FC_{1B}}}\\
+            &=  (\theta_{2b})^T  \textbf{BN}'_{\gamma,\beta}(a^{FC_{1B}}) \delta_{FC_{2B}} \odot \textbf{ReLU}'(z^{FC_{1B}})
+            % &= \frac{1}{m} \sum_{i=1}^m \left(\hat{y}_a-y_a\right) - \frac{\partial y_{b i}^{j} \log \left(\widehat{y}_{b i}^{j}\right)}{\partial z^{FC_{2B}}}\cdot\frac{\partial z^{FC_{2B}}}{\partial\hat{y}_a}\\
+            % &= \frac{1}{m} \sum_{i=1}^m \left(\left(\hat{y}_a-y_a\right) + \left(\theta_{2b}\right)^T\left(\hat{y}_{bi}-y_{bi}\right)\right)
+        \end{align*}
+        其中，$\frac{\partial\textbf{BN}_j}{\partial x_i}$满足：
+        {\small
+        \begin{align*}
+            &\frac{\partial\textbf{BN}_j}{\partial x_i} = \frac{\partial \frac{x_{j}-\mu}{\sqrt{\sigma^{2}+\epsilon}}}{\partial x_{i}}\\
+            &=
+            \begin{cases}
+                -\frac{1}{m}\left(\sigma^{2}+\epsilon\right)^{-1 / 2}-\frac{1}{m}\left(\sigma^{2}+\epsilon\right)^{-3 / 2}\left(x_{i}-\mu\right)\left(x_{j}-\mu\right)& i\neq j\\
+                \left(1-\frac{1}{m}\right)\left(\sigma^{2}+\epsilon\right)^{-1 / 2}-\frac{1}{m}\left(\sigma^{2}+\epsilon\right)^{-3 / 2}\left(x_{i}-\mu\right)\left(x_{j}-\mu\right)& i=j
+            \end{cases}
+        \end{align*}}
+        
+        对于$\theta_{1b}$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial \theta_{1b}} &= \delta_{FC_{1B}} \cdot \left(\frac{\partial z^{FC_{1B}}}{\partial \theta_{1b}}\right)^T \\
+            &=\delta_{FC_{1B}}\bm{x}^T
+        \end{align*}
+
+        $FC_{2A}$的残余$\delta_{FC_{2A}}$：
+        \begin{align*}
+            \delta_{FC_{2A}} &= \frac{\partial L}{\partial z^{FC_{2A}}} = \frac{\partial L}{\partial \hat{y}_a} \\
+            &= \frac{1}{m} \sum_{i=1}^m \left(\hat{y}_a-y_a\right) - \frac{\partial y_{b i}^{j} \log \left(\widehat{y}_{b i}^{j}\right)}{\partial z^{FC_{2B}}}\cdot\frac{\partial z^{FC_{2B}}}{\partial\hat{y}_a}\\
+            &= \frac{1}{m} \sum_{i=1}^m \left(\left(\hat{y}_a-y_a\right) + \left(\theta_{2b}\right)^T\left(\hat{y}_{bi}-y_{bi}\right)\right)
+        \end{align*}
+        对于$\theta_{2a}$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial \theta_{2a}} &= \delta_{FC_{2A}} \cdot \left(\frac{\partial z^{FC_{2A}}}{\partial \theta_{2a}}\right)^T \\
+            &=\left(\frac{1}{m} \sum_{i=1}^m \left(\hat{y}_a-y_a\right) + \left(\theta_{2b}\right)^T\left(\hat{y}_{bi}-y_{bi}\right)\right)\bm{x}^T
+        \end{align*}
+
+        $FC_{1A}$的残余$\delta_{FC_{1A}}$：
+        \begin{align*}
+            \delta_{FC_{1A}} &= \frac{\partial L}{\partial z^{FC_{1A}}} 
+            =\left(\frac{\partial z^{FC_{2A}}}{\partial a^{FC_{1A}}}\right)^T \cdot \delta_{FC_{2A}} \cdot \frac{\partial a^{FC_{1A}}}{\partial z^{FC_{1A}}}\\
+            &=  (\theta_{2a})^T \delta_{FC_{2A}} \odot \textbf{M} \odot \textbf{ReLU}'(z^{FC_{1A}})
+            % &= \frac{1}{m} \sum_{i=1}^m \left(\hat{y}_a-y_a\right) - \frac{\partial y_{b i}^{j} \log \left(\widehat{y}_{b i}^{j}\right)}{\partial z^{FC_{2B}}}\cdot\frac{\partial z^{FC_{2B}}}{\partial\hat{y}_a}\\
+            % &= \frac{1}{m} \sum_{i=1}^m \left(\left(\hat{y}_a-y_a\right) + \left(\theta_{2b}\right)^T\left(\hat{y}_{bi}-y_{bi}\right)\right)
+        \end{align*}
+        其中，$\odot$是逐元素乘法。
+
+        对于$\theta_{1a}$的梯度：
+        \begin{align*}
+            \frac{\partial L}{\partial \theta_{1a}} &= \delta_{FC_{1A}} \cdot \left(\frac{\partial z^{FC_{1A}}}{\partial \theta_{1a}}\right)^T \\
+            &= \left((\theta_{2a})^T \delta_{FC_{2A}} \odot \textbf{M} \odot \textbf{ReLU}'(z^{FC_{1A}})\right)\bm{x}^T
+        \end{align*}
+
+        % 对于$\theta_{1b}$的梯度：
+        % \begin{align*}
+        %     \frac{\partial L}{\partial \theta_{1b}} &= \frac{\partial L}{\partial Z^{BN_{1B}}} \cdot \frac{\partial Z^{BN_{1B}}}{\partial \theta_{1b}} \\
+        %     &= \frac{\partial L}{\partial Z^{BN_{1B}}} \cdot \frac{\partial Z^{FC_{1B}}}{\partial \theta_{1b}}\cdot \textbf{ReLU}'(Z^{FC_{1B}})\\
+        %     &= \delta^{BN_{1B}} \cdot \bm{x}\cdot \textbf{ReLU}'(Z^{FC_{1B}})
+        %     % &= \frac{\partial L}{\partial \hat{y}_b} \cdot \left(\textbf{BN}_{\gamma,\beta}(a^{FC_{1B}})\oplus\hat{y}_a\right) \cdot \textbf{Softmax}'(Z^{FC_{2B}})
+        % \end{align*}
+        % 其中，$BN_{1B}$层的残差$\delta^{BN_{1B}}$，满足：
+        % \begin{align*}
+        %     \delta^{BN_{1B}} &= \frac{\partial L}{\partial Z^{BN_{1B}}} = \frac{\partial L}{\partial \hat{y}_b} \cdot \frac{\partial \hat{y}_b}{\partial a^{BN_{1B}}} \cdot \frac{\partial a^{BN_{1B}}}{\partial Z^{BN_{1B}}} \\
+        %     &= \frac{\partial L}{\partial \hat{y}_b} \cdot \frac{\partial Z^{FC_{2B}}}{\partial a^{BN_{1B}}}\cdot \textbf{Softmax}'(Z^{FC_{2B}})\cdot \textbf{BN}'(Z^{BN_{1B}})\\
+        %     &= \frac{\partial L}{\partial \hat{y}_b} \cdot \theta_{2b} \cdot \textbf{Softmax}'(Z^{FC_{2B}})\cdot \textbf{BN}'(Z^{BN_{1B}})
+        % \end{align*}
+
     \end{enumerate}
 \end{solution}
