@@ -92,7 +92,7 @@
         \begin{align*}
             \delta_{FC_{1B}} &= \frac{\partial L}{\partial z^{FC_{1B}}} 
             =\left(\frac{\partial z^{FC_{2B}}}{\partial a^{FC_{1B}}}\right)^T \cdot \delta_{FC_{2B}} \cdot \frac{\partial a^{FC_{1B}}}{\partial z^{FC_{1B}}}\\
-            &=  (\theta_{2b})^T  \textbf{BN}'_{\gamma,\beta}(a^{FC_{1B}}) \delta_{FC_{2B}} \odot \textbf{ReLU}'(z^{FC_{1B}})
+            &=  \left(\theta_{2b}  \textbf{BN}'_{\gamma,\beta}(a^{FC_{1B}})\right)^T \delta_{FC_{2B}} \odot \textbf{ReLU}'(z^{FC_{1B}})
             % &= \frac{1}{m} \sum_{i=1}^m \left(\hat{y}_a-y_a\right) - \frac{\partial y_{b i}^{j} \log \left(\widehat{y}_{b i}^{j}\right)}{\partial z^{FC_{2B}}}\cdot\frac{\partial z^{FC_{2B}}}{\partial\hat{y}_a}\\
             % &= \frac{1}{m} \sum_{i=1}^m \left(\left(\hat{y}_a-y_a\right) + \left(\theta_{2b}\right)^T\left(\hat{y}_{bi}-y_{bi}\right)\right)
         \end{align*}
