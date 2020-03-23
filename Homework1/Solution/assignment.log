@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018) (preloaded format=xelatex 2019.4.3)  9 MAR 2020 01:53
+This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018) (preloaded format=xelatex 2019.4.3)  16 MAR 2020 00:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1375,18 +1375,18 @@ LaTeX Font Info:    Try loading font information for U+eus on input line 6.
 File: ueus.fd 2013/01/14 v3.01 Euler Script
 )) (./Details/problem2.tex [1
 
-]) (./Details/solve2.tex) [2] (./assignment.aux)
+]) (./Details/solve2.tex [2] [3] [4]) [5] (./assignment.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 19101 strings out of 492970
- 412309 string characters out of 6133939
- 502102 words of memory out of 5000000
- 22832 multiletter control sequences out of 15000+600000
- 536734 words of font info for 67 fonts, out of 8000000 for 9000
+ 19159 strings out of 492970
+ 414494 string characters out of 6133939
+ 503102 words of memory out of 5000000
+ 22875 multiletter control sequences out of 15000+600000
+ 542103 words of font info for 90 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 59i,14n,94p,10421b,633s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 59i,15n,94p,10421b,691s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on assignment.pdf (2 pages).
+Output written on assignment.pdf (5 pages).
